@@ -19,7 +19,11 @@ jobs:
 
       - name: Save Docker Image
         run: |
-          docker save myapp:latest -o myapp.tar
+          docker save myapp:latest -o /tmp/myapp.tar
+
+      - name: File Permission
+        run: |
+          chmod 644 /tmp/myapp.tar
 
       - name: Copy Image to VM
         uses: appleboy/scp-action@v0.1.7
@@ -27,7 +31,7 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          source: "myapp.tar"
+          source: "/tmp/myapp.tar"
           target: "/home/${{ secrets.VM_USER }}/"
 
       - name: Deploy on VM
@@ -37,7 +41,7 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            docker load -i myapp.tar
+            docker load -i /home/${{ secrets.VM_USER }}/myapp.tar
 
             docker stop myapp || true
             docker rm myapp || true
@@ -47,3 +51,5 @@ jobs:
               -p 8080:8080 \
               --restart always \
               myapp:latest
+
+            rm -f /home/${{ secrets.VM_USER }}/myapp.tar
