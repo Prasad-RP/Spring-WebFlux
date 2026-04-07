@@ -16,7 +16,7 @@ public class TestApi {
 	@GetMapping
 	public String testFlow() {
 		log.info("running server");
-		return "hello from server";
+		return "hello from server v1";
 	}
 
 }
